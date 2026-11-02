@@ -45,7 +45,7 @@ public sealed partial class PlayerWindow : Window
     private long? _loopA;
     private long? _loopB;
 
-    private readonly DispatcherQueueTimer _toastTimer;
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _toastTimer;
     private Action? _toastAction;
 
     public PlayerWindow()
