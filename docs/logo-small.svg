@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1B1446"/>
+      <stop offset="0.55" stop-color="#2A1263"/>
+      <stop offset="1" stop-color="#0B1030"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.18" stop-color="#C9F6FF" stop-opacity="0.95"/>
+      <stop offset="0.45" stop-color="#3FD8FF" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#3FD8FF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.35" stop-color="#7DE9FF"/>
+      <stop offset="1" stop-color="#FF4FD8"/>
+    </linearGradient>
+    <linearGradient id="beamUp" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#7DE9FF" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#7DE9FF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FF4FD8"/>
+      <stop offset="1" stop-color="#3FD8FF"/>
+    </linearGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <clipPath id="tile"><rect x="16" y="16" width="480" height="480" rx="112"/></clipPath>
+  </defs>
+
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bg)"/>
+
+  <g clip-path="url(#tile)">
+    <!-- faint stars -->
+    <g fill="#FFFFFF">
+      <circle cx="96" cy="118" r="2.5" opacity="0.7"/>
+      <circle cx="412" cy="96" r="2" opacity="0.6"/>
+      <circle cx="430" cy="350" r="2.5" opacity="0.5"/>
+      <circle cx="80" cy="380" r="2" opacity="0.5"/>
+      <circle cx="372" cy="430" r="1.8" opacity="0.5"/>
+    </g>
+
+    <!-- pulse rings (tilted, like a spinning pulsar) -->
+    <g fill="none" stroke="url(#ring)" stroke-linecap="round" transform="rotate(-18 256 220)">
+      
+      <ellipse cx="256" cy="220" rx="122" ry="38" stroke-width="22" opacity="0.8"/>
+      <ellipse cx="256" cy="220" rx="78" ry="24" stroke-width="0" opacity="0.95"/>
+    </g>
+
+    <!-- upward jet -->
+    <path d="M244 214 L256 40 L268 214 Z" fill="url(#beamUp)" opacity="0.8"/>
+
+    <!-- downward jet shaped as a download arrow -->
+    <g filter="url(#soft)" opacity="0.8">
+      <path d="M238 232 L274 232 L274 352 L318 352 L256 432 L194 352 L238 352 Z" fill="#FF4FD8"/>
+    </g>
+    <path d="M226 228 L286 228 L286 330 L346 330 L256 450 L166 330 L226 330 Z" fill="url(#beam)"/>
+
+    <!-- core -->
+    <circle cx="256" cy="220" r="92" fill="url(#glow)"/>
+    <circle cx="256" cy="220" r="44" fill="#FFFFFF"/>
+    <!-- four-point sparkle -->
+    <path d="M256 168 C260 204 268 212 304 220 C268 228 260 236 256 272 C252 236 244 228 208 220 C244 212 252 204 256 168 Z" fill="#FFFFFF"/>
+  </g>
+
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
+</svg>

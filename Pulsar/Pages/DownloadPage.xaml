@@ -1,0 +1,252 @@
+<Page
+    x:Class="Pulsar.Pages.DownloadPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="using:Pulsar.Models"
+    NavigationCacheMode="Required">
+
+    <Grid Padding="28,8,28,20" RowSpacing="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Download" Style="{StaticResource TitleTextBlockStyle}" />
+
+        <!-- Setup / update banners -->
+        <StackPanel Grid.Row="1" Spacing="8">
+            <InfoBar
+                Severity="Warning"
+                IsClosable="False"
+                Title="Setup required"
+                Message="yt-dlp and ffmpeg need to be downloaded before you can start (about 150 MB)."
+                IsOpen="{x:Bind Setup.NeedsSetup, Mode=OneWay}">
+                <InfoBar.ActionButton>
+                    <Button Content="Install now" Command="{x:Bind Setup.InstallMissingCommand}" />
+                </InfoBar.ActionButton>
+                <InfoBar.Content>
+                    <StackPanel Spacing="4" Margin="0,0,0,12" Visibility="{x:Bind Setup.IsBusy, Mode=OneWay}">
+                        <TextBlock Text="{x:Bind Setup.ToolStatus, Mode=OneWay}" Style="{StaticResource HintTextStyle}" />
+                        <ProgressBar Value="{x:Bind Setup.ToolProgress, Mode=OneWay}" IsIndeterminate="{x:Bind Setup.ToolProgressIndeterminate, Mode=OneWay}" />
+                    </StackPanel>
+                </InfoBar.Content>
+            </InfoBar>
+
+            <InfoBar
+                Severity="Informational"
+                Title="Update available"
+                Message="{x:Bind Setup.UpdateMessage, Mode=OneWay}"
+                IsOpen="{x:Bind Setup.UpdateAvailable, Mode=OneWay}">
+                <InfoBar.ActionButton>
+                    <Button Content="Update yt-dlp" Command="{x:Bind Setup.UpdateYtDlpCommand}" />
+                </InfoBar.ActionButton>
+                <InfoBar.Content>
+                    <ProgressBar Margin="0,0,0,12" IsIndeterminate="True" Visibility="{x:Bind Setup.IsBusy, Mode=OneWay}" />
+                </InfoBar.Content>
+            </InfoBar>
+
+            <InfoBar
+                Severity="Success"
+                Title="Link copied"
+                Message="{x:Bind VM.ClipboardUrl, Mode=OneWay}"
+                IsOpen="{x:Bind VM.HasClipboardSuggestion, Mode=OneWay}"
+                CloseButtonCommand="{x:Bind VM.DismissClipboardCommand}">
+                <InfoBar.ActionButton>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Add to queue" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind VM.QueueClipboardCommand}" />
+                        <Button Content="Choose format…" Command="{x:Bind VM.UseClipboardCommand}" />
+                    </StackPanel>
+                </InfoBar.ActionButton>
+            </InfoBar>
+        </StackPanel>
+
+        <!-- New download -->
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}">
+            <StackPanel Spacing="14">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                        PlaceholderText="Paste a video or playlist URL, then press Enter to queue it"
+                        Text="{x:Bind VM.Url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        KeyDown="UrlBox_KeyDown" />
+                    <Button Grid.Column="1" Command="{x:Bind VM.PasteCommand}" ToolTipService.ToolTip="Paste from clipboard and look it up">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE77F;" FontSize="14" />
+                            <TextBlock Text="Paste" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="2" Command="{x:Bind VM.FetchInfoCommand}" ToolTipService.ToolTip="Look up the title and available formats">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE721;" FontSize="14" />
+                            <TextBlock Text="Fetch info" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind VM.IsFetching, Mode=OneWay}">
+                    <ProgressRing IsActive="True" Width="16" Height="16" />
+                    <TextBlock Text="Looking up video…" Style="{StaticResource HintTextStyle}" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <InfoBar Severity="Error" IsClosable="False" Message="{x:Bind VM.Error, Mode=OneWay}" IsOpen="{x:Bind VM.HasError, Mode=OneWay}" />
+
+                <!-- Preview -->
+                <Grid ColumnSpacing="14" Visibility="{x:Bind VM.HasInfo, Mode=OneWay}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="160" Height="90" CornerRadius="6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                        <Image Source="{x:Bind VM.Thumbnail, Mode=OneWay}" Stretch="UniformToFill" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                        <TextBlock Text="{x:Bind VM.InfoTitle, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" MaxLines="2" />
+                        <TextBlock Text="{x:Bind VM.InfoSubtitle, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Format -->
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                        Header="Format preset"
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{x:Bind VM.Presets}"
+                        SelectedIndex="{x:Bind VM.SelectedPresetIndex, Mode=TwoWay}" />
+                    <ComboBox
+                        Grid.Column="1"
+                        Header="Specific format (optional, after Fetch info)"
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{x:Bind VM.Formats}"
+                        SelectedIndex="{x:Bind VM.SelectedFormatIndex, Mode=TwoWay}"
+                        IsEnabled="{x:Bind VM.HasFormats, Mode=OneWay}" />
+                </Grid>
+
+                <!-- Destination -->
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Header="Save to" Text="{x:Bind VM.OutputFolder, Mode=TwoWay}" />
+                    <Button Grid.Column="1" VerticalAlignment="Bottom" Content="Browse…" Command="{x:Bind VM.BrowseFolderCommand}" />
+                </Grid>
+
+                <Expander Header="More options" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="12">
+                        <Grid ColumnSpacing="24" RowSpacing="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <CheckBox Content="Embed thumbnail as cover art" IsChecked="{x:Bind VM.EmbedThumbnail, Mode=TwoWay}" />
+                            <CheckBox Grid.Column="1" Content="Embed metadata (title, artist, date)" IsChecked="{x:Bind VM.EmbedMetadata, Mode=TwoWay}" />
+                            <CheckBox Grid.Row="1" Content="Download English subtitles" IsChecked="{x:Bind VM.Subtitles, Mode=TwoWay}" />
+                            <CheckBox Grid.Row="1" Grid.Column="1" Content="Download the whole playlist" IsChecked="{x:Bind VM.Playlist, Mode=TwoWay}" />
+                            <CheckBox Grid.Row="2" Content="Embed chapters" IsChecked="{x:Bind VM.EmbedChapters, Mode=TwoWay}" />
+                            <CheckBox Grid.Row="2" Grid.Column="1" Content="Also split into one file per chapter" IsChecked="{x:Bind VM.SplitChapters, Mode=TwoWay}"
+                                      ToolTipService.ToolTip="Great for albums, mixes and long podcasts. Chapter files go in a subfolder." />
+                        </Grid>
+                        <ComboBox Header="SponsorBlock (YouTube)" HorizontalAlignment="Stretch" SelectedIndex="{x:Bind VM.SponsorBlockIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="Off" />
+                            <ComboBoxItem Content="Mark sponsors and other segments as chapters" />
+                            <ComboBoxItem Content="Cut sponsors and other segments out of the file" />
+                        </ComboBox>
+                        <TextBlock Style="{StaticResource HintTextStyle}"
+                                   Text="Which segment types count (sponsors, intros, outros…) is set in Settings. Browser cookies and the speed limit there apply to every download." />
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Header="Clip start (optional)" PlaceholderText="e.g. 1:30" Text="{x:Bind VM.SectionStart, Mode=TwoWay}" />
+                            <TextBox Grid.Column="1" Header="Clip end (optional)" PlaceholderText="e.g. 2:45" Text="{x:Bind VM.SectionEnd, Mode=TwoWay}" />
+                        </Grid>
+                        <TextBlock Style="{StaticResource HintTextStyle}"
+                                   Text="A clip downloads only that part of the video. Leave both blank to get the whole thing." />
+                    </StackPanel>
+                </Expander>
+
+                <Button Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Right" Command="{x:Bind VM.AddToQueueCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE896;" FontSize="14" />
+                        <TextBlock Text="Add to queue" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Queue -->
+        <Grid Grid.Row="3">
+            <TextBlock Text="Queue" Style="{StaticResource SubtitleTextBlockStyle}" VerticalAlignment="Center" />
+            <Button HorizontalAlignment="Right" Content="Clear finished" Command="{x:Bind VM.ClearFinishedCommand}" />
+        </Grid>
+
+        <TextBlock Grid.Row="4" Text="Nothing queued yet. Paste a link above to get started."
+                   Style="{StaticResource HintTextStyle}" HorizontalAlignment="Center" Margin="0,24,0,0"
+                   Visibility="{x:Bind VM.HasNoJobs, Mode=OneWay}" />
+
+        <ListView Grid.Row="4" ItemsSource="{x:Bind VM.Jobs}" SelectionMode="None" Padding="0">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0,0,0,6" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="m:DownloadJob">
+                    <Border Style="{StaticResource CardStyle}" Padding="14,10">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="{x:Bind Title, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" TextTrimming="CharacterEllipsis" />
+                                <ProgressBar
+                                    Value="{x:Bind Percent, Mode=OneWay}"
+                                    IsIndeterminate="{x:Bind ShowIndeterminate, Mode=OneWay}"
+                                    ShowError="{x:Bind IsFailed, Mode=OneWay}"
+                                    ShowPaused="{x:Bind IsCanceled, Mode=OneWay}" />
+                                <TextBlock Text="{x:Bind StatusText, Mode=OneWay}" Style="{StaticResource HintTextStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                <Button Click="Play_Click" Visibility="{x:Bind CanPlay, Mode=OneWay}" ToolTipService.ToolTip="Play">
+                                    <FontIcon Glyph="&#xE768;" FontSize="14" />
+                                </Button>
+                                <Button Click="ShowInFolder_Click" Visibility="{x:Bind IsDone, Mode=OneWay}" ToolTipService.ToolTip="Show in folder">
+                                    <FontIcon Glyph="&#xE838;" FontSize="14" />
+                                </Button>
+                                <Button Click="Retry_Click" Visibility="{x:Bind CanRetry, Mode=OneWay}" ToolTipService.ToolTip="Retry">
+                                    <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                                </Button>
+                                <Button Click="Cancel_Click" Visibility="{x:Bind IsActive, Mode=OneWay}" ToolTipService.ToolTip="Cancel">
+                                    <FontIcon Glyph="&#xE711;" FontSize="14" />
+                                </Button>
+                                <Button Click="Remove_Click" Visibility="{x:Bind IsFinished, Mode=OneWay}" ToolTipService.ToolTip="Remove from list">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="14" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>

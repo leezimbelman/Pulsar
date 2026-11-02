@@ -1,0 +1,168 @@
+<Window
+    x:Class="Pulsar.PlayerWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vlc="using:LibVLCSharp.Platforms.Windows"
+    Title="Pulsar Player">
+
+    <Grid x:Name="Root" AllowDrop="True" DragOver="Root_DragOver" Drop="Root_Drop" KeyDown="Root_KeyDown">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Title bar -->
+        <Grid x:Name="TitleBar" Height="40" Padding="14,0,140,0">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Image Source="ms-appx:///Assets/Pulsar-256.png" Width="16" Height="16" />
+                <TextBlock x:Name="TitleText" Text="Pulsar Player" Style="{StaticResource CaptionTextBlockStyle}" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Video stage (focusable so keyboard shortcuts work) -->
+        <ContentControl
+            x:Name="Stage"
+            Grid.Row="1"
+            IsTabStop="True"
+            UseSystemFocusVisuals="False"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            Tapped="Stage_Tapped"
+            DoubleTapped="Stage_DoubleTapped">
+            <Grid Background="Black">
+                <vlc:VideoView x:Name="Video" Initialized="Video_Initialized" />
+
+                <StackPanel x:Name="Placeholder" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14" MaxWidth="600">
+                    <FontIcon x:Name="PlaceholderIcon" Glyph="&#xE8B2;" FontSize="72" Foreground="#80FFFFFF" />
+                    <TextBlock x:Name="PlaceholderText" Text="Open a file, or drop one here" Foreground="#E6FFFFFF"
+                               HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                               Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <Button x:Name="PlaceholderOpen" Content="Open file…" HorizontalAlignment="Center" Click="Open_Click" />
+                </StackPanel>
+
+                <!-- Little toast for "Resumed at…", "Snapshot saved", loop changes -->
+                <InfoBar x:Name="Toast" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,12,0,0" MaxWidth="560"
+                         IsOpen="False" IsClosable="True" Severity="Informational">
+                    <InfoBar.ActionButton>
+                        <Button x:Name="ToastAction" Click="ToastAction_Click" />
+                    </InfoBar.ActionButton>
+                </InfoBar>
+            </Grid>
+        </ContentControl>
+
+        <!-- Transport controls -->
+        <Grid x:Name="TransportBar" Grid.Row="2" Padding="14,6,14,10" RowSpacing="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="PositionText" Text="0:00" VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="12" />
+                <Grid Grid.Column="1" x:Name="SeekHost" SizeChanged="SeekHost_SizeChanged">
+                    <Canvas x:Name="MarkerCanvas" IsHitTestVisible="False" VerticalAlignment="Center" Height="14">
+                        <Rectangle x:Name="RangeRect" Height="6" Canvas.Top="4" RadiusX="3" RadiusY="3" Opacity="0.45"
+                                   Fill="{ThemeResource AccentFillColorDefaultBrush}" Visibility="Collapsed" />
+                        <Rectangle x:Name="InMark" Width="3" Height="14" Fill="{ThemeResource AccentFillColorDefaultBrush}" Visibility="Collapsed" />
+                        <Rectangle x:Name="OutMark" Width="3" Height="14" Fill="{ThemeResource AccentFillColorDefaultBrush}" Visibility="Collapsed" />
+                        <Rectangle x:Name="LoopRect" Height="3" Canvas.Top="12" Fill="#FFFF4FD8" Visibility="Collapsed" />
+                    </Canvas>
+                    <Slider x:Name="Seek" Minimum="0" Maximum="1" StepFrequency="1"
+                            IsThumbToolTipEnabled="False" AllowFocusOnInteraction="False" VerticalAlignment="Center"
+                            ValueChanged="Seek_ValueChanged" />
+                </Grid>
+                <TextBlock x:Name="LengthText" Grid.Column="2" Text="0:00" VerticalAlignment="Center" FontFamily="Cascadia Mono, Consolas" FontSize="12" />
+            </Grid>
+
+            <Grid Grid.Row="1" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <Button Click="Open_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Open file (Ctrl+O)">
+                        <FontIcon Glyph="&#xE8E5;" FontSize="14" />
+                    </Button>
+                    <Button Click="Back_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Back 10 seconds (←: 5 s)">
+                        <FontIcon Glyph="&#xE892;" FontSize="14" />
+                    </Button>
+                    <Button Style="{StaticResource AccentButtonStyle}" Click="PlayPause_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Play / pause (Space)">
+                        <FontIcon x:Name="PlayPauseIcon" Glyph="&#xE768;" FontSize="14" />
+                    </Button>
+                    <Button Click="Forward_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Forward 10 seconds (→: 5 s)">
+                        <FontIcon Glyph="&#xE893;" FontSize="14" />
+                    </Button>
+                    <Button Click="Stop_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Stop">
+                        <FontIcon Glyph="&#xE71A;" FontSize="14" />
+                    </Button>
+                </StackPanel>
+
+                <!-- Clip tools -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                    <Button Click="MarkIn_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Mark start of clip (I)">
+                        <TextBlock Text="[ In" FontFamily="Cascadia Mono, Consolas" FontSize="12" />
+                    </Button>
+                    <Button Click="MarkOut_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Mark end of clip (O)">
+                        <TextBlock Text="Out ]" FontFamily="Cascadia Mono, Consolas" FontSize="12" />
+                    </Button>
+                    <TextBlock x:Name="MarksText" VerticalAlignment="Center" Margin="6,0" FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Button x:Name="SendToTrimButton" Click="SendToTrim_Click" AllowFocusOnInteraction="False" IsEnabled="False"
+                            ToolTipService.ToolTip="Open the Trim tool with these points">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE8C6;" FontSize="13" />
+                            <TextBlock Text="Send to Trim" FontSize="12" />
+                        </StackPanel>
+                    </Button>
+                    <ToggleButton x:Name="LoopButton" Click="Loop_Click" AllowFocusOnInteraction="False"
+                                  ToolTipService.ToolTip="A-B loop: press once to set A, again for B, again to clear (L)">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE8EE;" FontSize="13" />
+                            <TextBlock x:Name="LoopText" Text="A-B" FontSize="12" />
+                        </StackPanel>
+                    </ToggleButton>
+                    <Button Click="Snapshot_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Save this frame as a PNG (S)">
+                        <FontIcon Glyph="&#xE722;" FontSize="14" />
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+                    <Button Click="Mute_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Mute (M)">
+                        <FontIcon x:Name="VolumeIcon" Glyph="&#xE767;" FontSize="14" />
+                    </Button>
+                    <Slider x:Name="VolumeSlider" Width="100" Minimum="0" Maximum="100" Value="80" VerticalAlignment="Center"
+                            AllowFocusOnInteraction="False" ValueChanged="Volume_ValueChanged" Margin="4,0,8,0" />
+                    <ComboBox x:Name="SpeedBox" SelectedIndex="2" MinWidth="80" VerticalAlignment="Center"
+                              SelectionChanged="Speed_SelectionChanged" ToolTipService.ToolTip="Playback speed">
+                        <ComboBoxItem Content="0.5×" />
+                        <ComboBoxItem Content="0.75×" />
+                        <ComboBoxItem Content="1×" />
+                        <ComboBoxItem Content="1.25×" />
+                        <ComboBoxItem Content="1.5×" />
+                        <ComboBoxItem Content="2×" />
+                    </ComboBox>
+                    <Button AllowFocusOnInteraction="False" ToolTipService.ToolTip="Audio track and subtitles">
+                        <FontIcon Glyph="&#xED1E;" FontSize="14" />
+                        <Button.Flyout>
+                            <MenuFlyout x:Name="TracksMenu" Opening="TracksMenu_Opening" Placement="TopEdgeAlignedRight" />
+                        </Button.Flyout>
+                    </Button>
+                    <Button Click="Pip_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Picture-in-picture: small window on top (P)">
+                        <FontIcon x:Name="PipIcon" Glyph="&#xEE49;" FontSize="14" />
+                    </Button>
+                    <Button Click="Fullscreen_Click" AllowFocusOnInteraction="False" ToolTipService.ToolTip="Full screen (F, double-click)">
+                        <FontIcon x:Name="FullscreenIcon" Glyph="&#xE740;" FontSize="14" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
