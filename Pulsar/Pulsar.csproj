@@ -7,7 +7,7 @@
     <AssemblyName>Pulsar</AssemblyName>
     <Product>Pulsar</Product>
     <Description>Download, play, cut and convert video and audio. A desktop front end for yt-dlp, ffmpeg, LibVLC and whisper.cpp.</Description>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\Pulsar.ico</ApplicationIcon>
     <Platforms>x64;ARM64</Platforms>
