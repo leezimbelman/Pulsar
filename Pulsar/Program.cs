@@ -21,7 +21,7 @@ public static partial class Program
         if (RedirectToRunningInstance())
             return 0;
 
-        Application.Start(_ =>
+        Application.Start(p =>
         {
             var context = new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread());
             SynchronizationContext.SetSynchronizationContext(context);
