@@ -166,6 +166,13 @@ public partial class ToolsViewModel : ObservableObject
         OnPropertyChanged(nameof(RunLabel));
     }
 
+    /// <summary>Screenshot mode: list a file that doesn't exist on this machine.</summary>
+    public void AddDemoFile(string path, string info)
+    {
+        Inputs.Add(new MediaFile(path) { Info = info });
+        OnPropertyChanged(nameof(RunLabel));
+    }
+
     /// <summary>Sets up a trim from in/out points chosen in the player.</summary>
     public void SetupTrim(string path, double startSeconds, double? endSeconds)
     {

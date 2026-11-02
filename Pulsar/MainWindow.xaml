@@ -10,6 +10,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <!-- Only shown in screenshot mode, where the Mica backdrop can't be captured. -->
+        <Border x:Name="CaptureBackground" Grid.RowSpan="2" Visibility="Collapsed"
+                Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" />
+
         <Grid x:Name="AppTitleBar" Padding="16,0,0,0">
             <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Image Source="ms-appx:///Assets/Pulsar-256.png" Width="18" Height="18" />

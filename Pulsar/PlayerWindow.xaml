@@ -30,7 +30,7 @@
             VerticalContentAlignment="Stretch"
             Tapped="Stage_Tapped"
             DoubleTapped="Stage_DoubleTapped">
-            <Grid Background="Black">
+            <Grid Background="{StaticResource PulsarInkBrush}">
                 <vlc:VideoView x:Name="Video" Initialized="Video_Initialized" />
 
                 <StackPanel x:Name="Placeholder" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14" MaxWidth="600">

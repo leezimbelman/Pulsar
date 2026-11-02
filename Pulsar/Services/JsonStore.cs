@@ -8,6 +8,9 @@ public static class JsonStore
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
     private static readonly object Gate = new();
 
+    /// <summary>When true (screenshot mode), nothing is written to disk.</summary>
+    public static bool ReadOnly { get; set; }
+
     public static string PathFor(string name) => Path.Combine(ToolPaths.AppData, name);
 
     public static T Load<T>(string name, Func<T> fallback)
@@ -27,6 +30,7 @@ public static class JsonStore
 
     public static void Save<T>(string name, T value)
     {
+        if (ReadOnly) return;
         try
         {
             string json = JsonSerializer.Serialize(value, Options);

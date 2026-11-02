@@ -33,6 +33,14 @@ public sealed partial class MainWindow : Window
     }
 
     public bool IsActive { get; private set; }
+
+    /// <summary>Fixed size and a solid background so RenderTargetBitmap captures look like the real window.</summary>
+    public void PrepareForScreenshots(int width, int height)
+    {
+        CaptureBackground.Visibility = Visibility.Visible;
+        if (AppWindow.Presenter is OverlappedPresenter p) p.Restore();
+        AppWindow.MoveAndResize(new RectInt32(0, 0, width, height));
+    }
     public bool IsVisible => AppWindow.IsVisible;
 
     // ---------- Navigation ----------

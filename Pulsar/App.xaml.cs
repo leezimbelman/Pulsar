@@ -41,6 +41,16 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         _dispatcher = DispatcherQueue.GetForCurrentThread();
+        var startupArgs = Environment.GetCommandLineArgs().Skip(1).ToList();
+
+        int shotIndex = startupArgs.FindIndex(a => a.Equals("--screenshots", StringComparison.OrdinalIgnoreCase));
+        if (shotIndex >= 0)
+        {
+            string dir = shotIndex + 1 < startupArgs.Count ? startupArgs[shotIndex + 1] : Path.Combine(Environment.CurrentDirectory, "screenshots");
+            LaunchForScreenshots(dir);
+            return;
+        }
+
         Settings.Load();
         History.Load();
         NotificationService.Initialize();
@@ -56,7 +66,6 @@ public partial class App : Application
         MainWindow = new MainWindow();
         ApplyTheme();
 
-        var startupArgs = Environment.GetCommandLineArgs().Skip(1).ToList();
         bool fromNotification = false;
         try
         {
@@ -80,6 +89,24 @@ public partial class App : Application
             _ = SettingsVM.RefreshVersionsAsync();
 
         Subscriptions.Start();
+    }
+
+    /// <summary>
+    /// Screenshot mode (used by the Screenshots workflow): sample content, no disk writes,
+    /// no network, no tray or notifications. Captures each page in dark and light, then exits.
+    /// </summary>
+    private void LaunchForScreenshots(string outputFolder)
+    {
+        JsonStore.ReadOnly = true;
+        Tools = new ToolsViewModel();
+        SettingsVM = new SettingsViewModel(Settings);
+        Downloads = new DownloadViewModel(Settings.Current);
+        HistoryVM = new HistoryViewModel(History);
+        Subscriptions = new SubscriptionsViewModel();
+
+        MainWindow = new MainWindow();
+        MainWindow.Activate();
+        _ = ScreenshotRunner.RunAsync(outputFolder);
     }
 
     public static void Dispatch(Action action) => _dispatcher?.TryEnqueue(() => action());

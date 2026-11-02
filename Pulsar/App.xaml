@@ -8,6 +8,25 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
 
+            <!--
+                Pulsar brand: the logo's green replaces Windows' accent color everywhere
+                (buttons, progress bars, toggles, selection). Light theme uses the darker
+                shades so white text on accent buttons stays above 4.5:1 contrast;
+                dark theme uses the lighter shades with dark text.
+            -->
+            <Color x:Key="SystemAccentColor">#2BD47D</Color>
+            <Color x:Key="SystemAccentColorLight1">#4FE596</Color>
+            <Color x:Key="SystemAccentColorLight2">#78F2B0</Color>
+            <Color x:Key="SystemAccentColorLight3">#A8F8CC</Color>
+            <Color x:Key="SystemAccentColorDark1">#0E7F45</Color>
+            <Color x:Key="SystemAccentColorDark2">#006840</Color>
+            <Color x:Key="SystemAccentColorDark3">#004D30</Color>
+
+            <Color x:Key="PulsarInkColor">#121521</Color>
+            <Color x:Key="PulsarGlowColor">#60F898</Color>
+            <SolidColorBrush x:Key="PulsarInkBrush" Color="{StaticResource PulsarInkColor}" />
+            <SolidColorBrush x:Key="PulsarGlowBrush" Color="{StaticResource PulsarGlowColor}" />
+
             <Style x:Key="CardStyle" TargetType="Border">
                 <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
                 <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />

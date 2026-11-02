@@ -326,6 +326,18 @@ public partial class SettingsViewModel : ObservableObject
         LatestVersion = "";
     }
 
+    /// <summary>Screenshot mode: show installed tools without touching the disk or network.</summary>
+    public void SetDemoVersions(string ytDlp, string ffmpeg)
+    {
+        HasYtDlp = true;
+        HasFfmpeg = true;
+        YtDlpVersion = ytDlp;
+        LatestVersion = ytDlp;
+        FfmpegVersion = ffmpeg;
+        ToolStatus = $"yt-dlp is up to date ({ytDlp}).";
+        WhisperStatus = "Ready: whisper.cpp and this model are installed.";
+    }
+
     public async Task RefreshVersionsAsync()
     {
         HasYtDlp = ToolPaths.HasYtDlp;
