@@ -5,6 +5,9 @@ name: Screenshots
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   screenshots:
     runs-on: windows-latest
@@ -30,6 +33,19 @@ jobs:
           if (-not $p.WaitForExit(180000)) { $p.Kill(); Write-Warning "Pulsar didn't exit in time" }
           Get-ChildItem $out
           if (Test-Path "$out\error.txt") { Get-Content "$out\error.txt" }
+
+      - name: Push to the "screenshots" branch
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP "screenshots"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan screenshots
+          git rm -rf --quiet .
+          Copy-Item "$out\*.png" .
+          git add *.png
+          git commit -m "Screenshots from $env:GITHUB_SHA"
+          git push --force origin screenshots
 
       - uses: actions/upload-artifact@v4
         with:
