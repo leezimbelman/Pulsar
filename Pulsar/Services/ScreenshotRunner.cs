@@ -27,7 +27,7 @@ public static class ScreenshotRunner
 
             foreach (var (themeName, theme) in new[] { ("dark", 2), ("light", 1) })
             {
-                App.Settings.Current.Theme = theme;
+                App.SettingsVM.ThemeIndex = theme; // applies the theme and updates the Settings page
                 App.ApplyTheme();
                 foreach (var page in Pages)
                 {

@@ -26,6 +26,8 @@ jobs:
       - name: Capture
         shell: pwsh
         run: |
+          # Hosted runners default to 1024x768; give the window room.
+          try { Set-DisplayResolution -Width 1920 -Height 1080 -Force -ErrorAction Stop } catch { Write-Warning "Couldn't change resolution: $_" }
           $exe = Get-ChildItem Pulsar\bin -Recurse -Filter Pulsar.exe | Select-Object -First 1
           $out = Join-Path $env:RUNNER_TEMP "screenshots"
           New-Item -ItemType Directory -Force $out | Out-Null

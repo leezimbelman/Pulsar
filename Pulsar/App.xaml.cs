@@ -98,6 +98,8 @@ public partial class App : Application
     private void LaunchForScreenshots(string outputFolder)
     {
         JsonStore.ReadOnly = true;
+        Settings.Current.DownloadFolder = @"C:\Users\you\Downloads";
+        Settings.Current.WatchClipboard = false;
         Tools = new ToolsViewModel();
         SettingsVM = new SettingsViewModel(Settings);
         Downloads = new DownloadViewModel(Settings.Current);
