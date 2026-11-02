@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="../../actions/workflows/build.yml"><img src="../../actions/workflows/build.yml/badge.svg" alt="Build" /></a>
-  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/{owner}/{repo}?label=download" alt="Latest release" /></a>
+  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/leezimbelman/Pulsar?label=download" alt="Latest release" /></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4" alt="Windows 10 and 11" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license" /></a>
 </p>
@@ -106,7 +106,7 @@ Pulsar is single-instance: a second launch hands its arguments to the running co
 Requirements: Windows 10/11, the [.NET 8 SDK](https://dotnet.microsoft.com/download) (or newer), and optionally Visual Studio 2022 with the *Windows application development* workload.
 
 ```powershell
-git clone https://github.com/{owner}/{repo}.git
+git clone https://github.com/leezimbelman/Pulsar.git
 cd Pulsar\Pulsar
 dotnet run -p:Platform=x64
 ```

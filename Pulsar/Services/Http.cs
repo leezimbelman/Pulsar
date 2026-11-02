@@ -7,7 +7,7 @@ public static class Http
     private static HttpClient Create()
     {
         var client = new HttpClient { Timeout = TimeSpan.FromMinutes(30) };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("Pulsar/1.0 (+https://github.com)");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("Pulsar/1.0 (+https://github.com/leezimbelman/Pulsar)");
         return client;
     }
 
